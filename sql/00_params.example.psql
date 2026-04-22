@@ -1,0 +1,39 @@
+-- =============================================================================
+-- 마이그레이션 파라미터 설정
+-- 이 파일을 복사하여 DB별로 관리: params/app-prod.psql, params/app-staging.psql 등
+-- DSN 은 절대 이 파일에 기록하지 않는다. 환경변수로만 주입.
+--
+-- 사용법:
+--   psql "$DATABASE_URL" -f params/app-prod.psql -f sql/01_discover.sql
+-- =============================================================================
+
+-- 변환 대상 부모 테이블 (schema.table 형식)
+\set parent          'public.orders'
+
+-- 파티션 키 컬럼명
+\set partition_col   'created_at'
+
+-- PK 전략 (반드시 명시 — 기본값 없음)
+--   composite      : PK(id) → PK(id, <partition_col>)  [권장. 애플리케이션 ON CONFLICT 확인 필요]
+--   drop           : PK 제거, 파티션별 개별 PK 없음     [주의: PK 없어짐]
+--   partition_local: 부모 PK 없이 자식별 PK 유지
+\set pk_strategy     'composite'
+
+-- 새 선언형 부모 테이블 이름 접미사 (기존 테이블명 + 접미사)
+\set new_suffix      '_new'
+
+-- 커트오버 후 기존 부모 테이블에 붙을 레거시 접미사
+\set legacy_suffix   '_legacy'
+
+-- 기본 파티션(DEFAULT) 생성 여부 — 범위 외 날짜 유입 대비
+\set default_partition 'true'
+
+-- 커트오버 시점에 미리 생성할 미래 파티션 수 (월 단위)
+\set future_months   '3'
+
+-- 세션 안전장치 (커트오버에서 사용)
+\set lock_timeout    '5s'
+\set stmt_timeout    '10min'
+
+-- 인덱스 불일치 처리: true = EXCEPTION(중단), false = WARNING(계속)
+\set strict_index_parity 'false'

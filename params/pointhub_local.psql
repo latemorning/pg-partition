@@ -1,0 +1,19 @@
+-- =============================================================================
+-- params/app-prod.psql 예시 파일
+-- 실제 사용 시 이 파일을 복사하여 DB 이름으로 저장:
+--   cp params/app-prod.example.psql params/my-db.psql
+--
+-- 이 파일은 git 에 커밋해도 됩니다. DSN/비밀값 절대 미포함.
+-- DSN 은 환경변수로만: export DATABASE_URL="postgresql://..."
+-- =============================================================================
+
+\set parent             'phub.ph_info_prvd_ag_hist'
+\set partition_col      'rgst_dt'
+\set pk_strategy        'composite'
+\set new_suffix         '_new'
+\set legacy_suffix      '_legacy'
+\set default_partition  'true'
+\set future_months      '3'
+\set lock_timeout       '5s'
+\set stmt_timeout       '10min'
+\set strict_index_parity 'false'
